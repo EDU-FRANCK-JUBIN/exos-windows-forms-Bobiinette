@@ -128,7 +128,14 @@ namespace Hexagones
             foreach(string univStr in universSplit)
             {
                 Console.WriteLine("univStr " + univStr);
-                Hexagone hex = JsonConvert.DeserializeObject<Hexagone>(univStr);
+                Hexagone hex = null;
+                try
+                {
+                    hex = JsonConvert.DeserializeObject<Hexagone>(univStr);
+                } catch(Newtonsoft.Json.JsonSerializationException e)
+                {
+                    //Ignore en cas d'erreur
+                }
                 if(hex != null)
                 {
                     this.ChangeColorHexagone(hex.ID, hex.Rouge, hex.Vert, hex.Bleu);
@@ -152,6 +159,11 @@ namespace Hexagones
                 Console.WriteLine(b);
             }*/
             return bytesRGB.ToArray();
+        }
+
+        public void AttributeIds()
+        {
+            bool changeQ = false;
         }
     }
 }

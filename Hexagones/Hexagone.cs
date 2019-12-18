@@ -57,9 +57,11 @@ namespace Hexagones
         {
             this.id = id;
             //Dégradé bleu et rouge
-            this.ChangeColorHexagone(Math.Min(255, id * 2), 0, Math.Max(0, 255-(id*3)));
+            //this.ChangeColorHexagone(Math.Min(255, id * 2), 0, Math.Max(0, 255-(id*3)));
             //Dégradé de vert
             //this.ChangeColorHexagone(0, Math.Min(255, id * 2), 0);
+            //Tout noir
+            this.ChangeColorHexagone(0, 0, 0);
         }
 
         public int Q
