@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ASampleBase.cs" />
+    <Compile Include="UniverIds.cs" />
     <Compile Include="Hexagone.cs" />
     <Compile Include="FormHexagones.cs">
       <SubType>Form</SubType>

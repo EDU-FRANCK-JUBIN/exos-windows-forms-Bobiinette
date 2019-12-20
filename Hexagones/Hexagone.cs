@@ -23,7 +23,7 @@ namespace Hexagones
         private Pen hPen;
         //L'objet associé au remplissage de l'hexagone
         private SolidBrush hBrush;
-        //Les points de l'hexagone
+        //Les points de l'hexagone, initialisé lorsque l'on dessine l'hexagone
         private Point[] points;
         
         //La couleur RGB de l'héxagone
@@ -35,6 +35,10 @@ namespace Hexagones
         private const int rayon = Program.rayon;
         private const double SIN_60 = 1.732050807569 / 2.0;//Math.Sqrt(3) / 2
 
+        ///<summary>
+        /// Constructeur par défaut 
+        /// On initialise les couleurs pour qu'il soit noir, et le trait de contour
+        ///</summary>
         public Hexagone()
         {
             rouge = 0;
@@ -45,25 +49,24 @@ namespace Hexagones
             hBrush = new SolidBrush(Color.FromArgb(rouge, vert, bleu));
         }
 
+        ///<summary>
+        /// Constructeur pour placer l'hexagone à partir de sa position <paramref name="q"/> et <paramref name="r"/> et de la position du centre de l'univers
+        ///</summary>
+        ///<param name="q">La position q dans le repère q,r</param>
+        ///<param name="r">La position r dans le repère q,r</param>
+        ///<param name="centreX">La position x du centre de l'univers</param>
+        ///<param name="centreY">La position y du centre de l'univers</param>
         public Hexagone(int q, int r, int centreX, int centreY) : this()
         {
             this.q = q;
             this.r =  - r;
             this.x = Convert.ToInt32(q * rayon * 2 * SIN_60 - r * rayon * SIN_60) + centreX;
             this.y = - r * rayon * 2 * 3 / 4 + centreY;
+            this.id = Univers.universIds[this.q, this.r];
+            this.ChangeColorHexagone(id*2, id*2, id*2);
         }
 
-        public Hexagone(int id, int q, int r, int centreX, int centreY) : this(q, r, centreX, centreY)
-        {
-            this.id = id;
-            //Dégradé bleu et rouge
-            //this.ChangeColorHexagone(Math.Min(255, id * 2), 0, Math.Max(0, 255-(id*3)));
-            //Dégradé de vert
-            //this.ChangeColorHexagone(0, Math.Min(255, id * 2), 0);
-            //Tout noir
-            this.ChangeColorHexagone(0, 0, 0);
-        }
-
+        //GET SET
         public int Q
         {
             get { return q; }
@@ -86,6 +89,11 @@ namespace Hexagones
         public int Vert { set { vert = value; } get { return vert ; } }
         public int Bleu { set { bleu = value; } get { return bleu; } }
 
+        ///<summary>
+        /// Permet de faire le rendu graphique d'un Hexagone
+        /// Calculs ses points pour le dessiner
+        ///</summary>
+        ///<param name="bmp">L'image dans laquelle on dessine l'hexagone</param>
         public Bitmap draw(Bitmap bmp)
         {
             points = new Point[6]
@@ -106,9 +114,10 @@ namespace Hexagones
             return bmp;
         }
 
-        /*
-         * Code pris en ligne, normalement ça marche
-         */
+        ///<summary>
+        /// Code pris en ligne, normalement ça marche
+        /// Permet de déterminer si l'Hexagone est touché lorsque l'on clique à la position <paramref name="x"/> <paramref name="y"/>
+        ///</summary>
         public bool IsHit(int x, int y)
         {
             int i, j = 5;
@@ -128,15 +137,26 @@ namespace Hexagones
             return oddNodes;
         }
 
-        public void TestIsHit(int x, int y, int id, FormHexagones form)
+        ///<summary>
+        ///Test si l'hexagone est touché et traite le cas si il l'est
+        ///</summary>
+        ///<param name="x">La position x où l'on clique</param>
+        ///<param name="y">La position y où l'on clique</param>
+        ///<param name="form">Le formulaire sur lequel on clique</param>
+        public void TestIsHit(int x, int y, FormHexagones form)
         {
             if(IsHit(x, y))
             {
-                this.id = id;
                 form.OnHexaHit(this);
             }
         }
 
+        /// <summary>
+        /// Change la couleur d'un hexagone
+        /// </summary>
+        /// <param name="rouge">Valeur de la couleur rouge entre 0 et 255</param>
+        /// <param name="vert">Valeur de la couleur vert entre 0 et 255</param>
+        /// <param name="bleu">Valeur de la couleur bleu entre 0 et 255</param>
         public void ChangeColorHexagone(int rouge, int vert, int bleu)
         {
             this.rouge = rouge;
@@ -145,7 +165,11 @@ namespace Hexagones
             hBrush = new SolidBrush(Color.FromArgb(rouge, vert, bleu));
         }
 
-        public string EnregistrerHexa(int id)
+        /// <summary>
+        /// Permet de générer une chaine de caractère avec les informations d'un hexagone
+        /// </summary>
+        /// <returns>Renvoie une chaine de caractères formatée en JSON pour enregistrer l'Hexagone dans un fichier</returns>
+        public string EnregistrerHexa()
         {
             string jsonOutput = JsonConvert.SerializeObject(new HexagoneSimplifie(this));
             Console.WriteLine("EnregistrerHexa" + jsonOutput);
@@ -153,6 +177,9 @@ namespace Hexagones
         }
     }
 
+    /// <summary>
+    /// Une classe avec seulement qu'une partie des informations pour l'enregistrement
+    /// </summary>
     public class HexagoneSimplifie
     {
         //Les positions suivant le repère q, r et l'id

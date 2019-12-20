@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Haukcode.Samples;
@@ -19,13 +20,16 @@ namespace Hexagones
         private Univers univers = null;
         private Bitmap bmp;
         private System.Collections.Generic.IEnumerable<(IPAddress Address, IPAddress NetMask)> addresses;
+        private Hexagone hexagonesSelectionne;
 
         public FormHexagones()
         {
             InitializeComponent();
-            this.Show();
         }
 
+        /// <summary>
+        /// Pour 
+        /// </summary>
         private new void Show()
         {
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -69,6 +73,7 @@ namespace Hexagones
 
         public void OnHexaHit(Hexagone hexa)
         {
+            hexagonesSelectionne = hexa;
             label_q.Text = hexa.Q.ToString();
             label_r.Text = hexa.R.ToString();
             label_id.Text = hexa.ID.ToString();
@@ -118,11 +123,10 @@ namespace Hexagones
 
         public void ChangeColorHexagone()
         {
-            int id = Convert.ToInt32(label_id.Text);
             int rouge = trackBar_rouge.Value;
             int vert = trackBar_vert.Value;
             int bleu = trackBar_bleu.Value;
-            univers.ChangeColorHexagone(id, rouge, vert, bleu);
+            hexagonesSelectionne.ChangeColorHexagone(rouge, vert, bleu);
             //On peut faire mieux mais il faut un deuxième thread
             //Il faut éviter d'actualiser en permanence, mais plutôt actualiser toutes les x millisecondes
             this.Show();
@@ -170,6 +174,53 @@ namespace Hexagones
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// On peut rajouter un bout
+        /// </summary>
+        public void Animation()
+        {
+            var fileContent = string.Empty;
+            //Get the path of specified file
+            string filePathBleu = "./hexagonesDegradeBleuRouge.txt";
+            string filePathVert = "./hexagonesVerts.txt";
+            string filePathNoir = "./hexagonesToutNoir.txt";
+
+            string[] files = new string[5] { filePathBleu, filePathVert, filePathBleu, filePathVert, filePathBleu };
+
+            //Read the contents of the file into a stream
+            string fileStream;
+            for(int i = 0; i < 5; i++)
+            {
+                fileStream = files[i];
+                using (StreamReader reader = new StreamReader(fileStream))
+                {
+                    fileContent = reader.ReadToEnd();
+                    univers.OuvrirUnivers(fileContent, tailleUnivers);
+                    this.Show();
+                }
+                Thread.Sleep(2000);
+            }
+
+            fileStream = filePathNoir;
+            using (StreamReader reader = new StreamReader(fileStream))
+            {
+                fileContent = reader.ReadToEnd();
+                univers.OuvrirUnivers(fileContent, tailleUnivers);
+                this.Show();
+            }
+        }
+
+        private void FormHexagones_Load(object sender, EventArgs e)
+        {
+            //A appeler pour un fonctionnement normal
+            this.Show();
+        }
+
+        private void button_animation_Click(object sender, EventArgs e)
+        {
+            this.Animation();
         }
     }
 }
