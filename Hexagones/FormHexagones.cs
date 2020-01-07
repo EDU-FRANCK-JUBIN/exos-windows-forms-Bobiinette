@@ -16,10 +16,18 @@ namespace Hexagones
 {
     public partial class FormHexagones : Form
     {
+        //Une constante pour définir la taille de l'univers
         private const int tailleUnivers = 7;
+
         private Univers univers = null;
+
+        //L'image dans laquelle on va générer l'univers
         private Bitmap bmp;
+        
+        //Pour gérer la connexion avec les LEDS
         private System.Collections.Generic.IEnumerable<(IPAddress Address, IPAddress NetMask)> addresses;
+
+        //L'hexagone sur lequel on a cliqué
         private Hexagone hexagonesSelectionne;
 
         public FormHexagones()
@@ -28,20 +36,29 @@ namespace Hexagones
         }
 
         /// <summary>
-        /// Pour 
+        /// Pour créer, puis afficher l'univers. Première fonction à appeler
         /// </summary>
         private new void Show()
         {
             bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             
             if (univers == null)
+            {
                 univers = new Univers(tailleUnivers, pictureBox1.Width / 2, pictureBox1.Height / 2);
+                Console.WriteLine("---------Creation d'un nouvel univers--------------");
+            }
+                
 
             univers.drawUniverse(bmp);
             pictureBox1.Image = bmp;
+            //Affichage sur le panneau de LEDs
             ArtNetDisplay();
         }
 
+        /// <summary>
+        /// Pour la communication avec le panneau de LEDs.
+        /// Récupère l'adresse IP du panneau, et on lui envoie un tableau de bytes avec les couleurs.
+        /// </summary>
         private void ArtNetDisplay()
         {
             addresses = Haukcode.ArtNet.Helper.GetAddressesFromInterfaceType();
@@ -63,14 +80,24 @@ namespace Hexagones
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            //Fallait pas double cliquer
+            //Fallait pas double cliquer sur le formulaire
         }
 
+        /// <summary>
+        /// Fonction appelée quand on clique sur l'image avec les hexagones.
+        /// On vérifie sur quel hexagone on a cliqué
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">Event qui contient la position du clic</param>
         private void pictureBox1_OnMouseDown(object sender, MouseEventArgs e)
         {
             univers.OnMouseDown(e.X, e.Y, this);
         }
 
+        /// <summary>
+        /// On met à jour les trackBars et les affichages numériques lors du clic sur un héxagone
+        /// </summary>
+        /// <param name="hexa">L'héxagone sur lequel on a cliqué</param>
         public void OnHexaHit(Hexagone hexa)
         {
             hexagonesSelectionne = hexa;
@@ -85,6 +112,12 @@ namespace Hexagones
             numericUpDown_bleu.Value = hexa.Bleu;
         }
 
+        /* 
+         * Fonctions pour gérer quand on change une valeur numérique sur les trackBar ou les numericUpDown.
+         * A chaque fois on met à jour le numericUpDown si on bouge le trackBar ou le trackBar si on change le numericUpDown.
+         * Puis, on change la couleur de l'héxagone
+         */
+        #region
         private void numericUpDown_rouge_ValueChanged(object sender, EventArgs e)
         {
             trackBar_rouge.Value = Convert.ToInt32(numericUpDown_rouge.Value);
@@ -120,7 +153,11 @@ namespace Hexagones
             numericUpDown_bleu.Value = trackBar_bleu.Value;
             ChangeColorHexagone();
         }
+        #endregion
 
+        /// <summary>
+        /// Change la couleur de l'héxagone en récupérant les valeurs des trackBars
+        /// </summary>
         public void ChangeColorHexagone()
         {
             int rouge = trackBar_rouge.Value;
@@ -132,6 +169,11 @@ namespace Hexagones
             this.Show();
         }
 
+        /// <summary>
+        /// On enregistre l'état actuel des héxagones dans le fichier à l'emplacement ./Hexagones.txt
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_enregistrer_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Votre message a été enregistré dans le fichier : " + univers.EnregistrerUnivers(),
@@ -141,15 +183,14 @@ namespace Hexagones
 
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
-            
+            //Fallait pas double cliquer
         }
 
-        /*Merci Microsoft
+        /* Merci Microsoft
          * https://docs.microsoft.com/fr-fr/dotnet/api/system.windows.forms.openfiledialog?view=netframework-4.8
          */
         private void button_ouvrir_Click(object sender, EventArgs e)
         {
-            var fileContent = string.Empty;
             var filePath = string.Empty;
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -163,25 +204,17 @@ namespace Hexagones
                     //Get the path of specified file
                     filePath = openFileDialog.FileName;
 
-                    //Read the contents of the file into a stream
-                    var fileStream = openFileDialog.OpenFile();
-
-                    using (StreamReader reader = new StreamReader(fileStream))
-                    {
-                        fileContent = reader.ReadToEnd();
-                        univers.OuvrirUnivers(fileContent, tailleUnivers);
-                        this.Show();
-                    }
+                    AfficherUniversDepuisFichier(filePath);
                 }
             }
         }
 
         /// <summary>
-        /// On peut rajouter un bout
+        /// Pour faire de l'annimation avec les LEDs, ne fait rien à l'écran
         /// </summary>
-        public void Animation()
+        public void AnnimationLEDs()
         {
-            var fileContent = string.Empty;
+            
             //Get the path of specified file
             string filePathBleu = "./hexagonesDegradeBleuRouge.txt";
             string filePathVert = "./hexagonesVerts.txt";
@@ -194,33 +227,58 @@ namespace Hexagones
             for(int i = 0; i < 5; i++)
             {
                 fileStream = files[i];
+                AfficherUniversDepuisFichier(fileStream);                
+                Thread.Sleep(2000);
+            }
+
+            fileStream = filePathNoir;
+            AfficherUniversDepuisFichier(fileStream);
+        }
+
+        /// <summary>
+        /// Pour gérer l'ouverture de fichiers pour l'annimation
+        /// </summary>
+        /// <param name="fileStream">Le chemin ver le fichier</param>
+        private void AfficherUniversDepuisFichier(string fileStream)
+        {
+            var fileContent = string.Empty;
+            try
+            {
                 using (StreamReader reader = new StreamReader(fileStream))
                 {
                     fileContent = reader.ReadToEnd();
                     univers.OuvrirUnivers(fileContent, tailleUnivers);
                     this.Show();
                 }
-                Thread.Sleep(2000);
             }
-
-            fileStream = filePathNoir;
-            using (StreamReader reader = new StreamReader(fileStream))
+            catch (System.IO.FileNotFoundException e)
             {
-                fileContent = reader.ReadToEnd();
-                univers.OuvrirUnivers(fileContent, tailleUnivers);
-                this.Show();
+                MessageBox.Show("Le fichier : " + fileStream + " est introuvable",
+                    "",
+                    MessageBoxButtons.OK);
             }
         }
 
+        /// <summary>
+        /// Fonction appelée lorsque la fenêtre a chargé.
+        /// Mettre ici this.Show pour afficher les héxagones à la fin du chargement
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FormHexagones_Load(object sender, EventArgs e)
         {
             //A appeler pour un fonctionnement normal
             this.Show();
         }
 
+        /// <summary>
+        /// Gère l'event du clic sur l'annimation
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_animation_Click(object sender, EventArgs e)
         {
-            this.Animation();
+            this.AnnimationLEDs();
         }
     }
 }

@@ -1,0 +1,9 @@
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\bin\Debug\WindowsApplication.exe.config
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\bin\Debug\WindowsApplication.exe
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\bin\Debug\WindowsApplication.pdb
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\obj\x86\Debug\Hexagones.vbprojAssemblyReference.cache
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\obj\x86\Debug\Hexagones.FormHexagones.resources
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\obj\x86\Debug\Hexagones.Resources.resources
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\obj\x86\Debug\Hexagones.vbproj.GenerateResource.cache
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\obj\x86\Debug\WindowsApplication.exe
+C:\Users\chevi\Documents\CODE\CSharp\ExosFormView\Hexagones\obj\x86\Debug\WindowsApplication.pdb

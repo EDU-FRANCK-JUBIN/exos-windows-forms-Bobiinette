@@ -59,11 +59,11 @@ namespace Hexagones
         public Hexagone(int q, int r, int centreX, int centreY) : this()
         {
             this.q = q;
-            this.r =  - r;
-            this.x = Convert.ToInt32(q * rayon * 2 * SIN_60 - r * rayon * SIN_60) + centreX;
-            this.y = - r * rayon * 2 * 3 / 4 + centreY;
+            this.r =  r;
+            this.x = Convert.ToInt32(q * rayon * 2 * SIN_60 + r * rayon * SIN_60) + centreX;
+            this.y = r * rayon * 2 * 3 / 4 + centreY;
             this.id = Univers.universIds[this.q, this.r];
-            this.ChangeColorHexagone(id*2, id*2, id*2);
+            this.ChangeColorHexagone(id*2, 0, 255 - id*2);
         }
 
         //GET SET

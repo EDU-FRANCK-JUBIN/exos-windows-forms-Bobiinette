@@ -105,7 +105,7 @@ namespace Hexagones
                     if (Math.Abs(r - q) < i + 1)
                     {
                         int nCount = hexas.Count;
-                        hexas.Add(new Hexagone(q, r, centreX, centreY));
+                        hexas.Add(new Hexagone(q, -r, centreX, centreY));
                         //System.Console.WriteLine("q " + q + " r " + r);
                     }
                 }
@@ -162,9 +162,9 @@ namespace Hexagones
         public void OuvrirUnivers(string univers, int taille)
         {
             string[] universSplit = univers.Split('\n');
-            foreach(string univStr in universSplit)
+            listeHexagonnes = new List<Hexagone>();
+            foreach (string univStr in universSplit)
             {
-                Console.WriteLine("univStr " + univStr);
                 Hexagone hex = null;
                 try
                 {
@@ -175,7 +175,10 @@ namespace Hexagones
                 }
                 if(hex != null)
                 {
-                    hex.ChangeColorHexagone(hex.Rouge, hex.Vert, hex.Bleu);
+                    Hexagone hexagone = new Hexagone(hex.Q, hex.R, centreX, centreY);
+                    hexagone.ChangeColorHexagone(hex.Rouge, hex.Vert, hex.Bleu);
+                    listeHexagonnes.Add(hexagone);
+                    Console.WriteLine("Hex rouge " + hex.Rouge + " vert " + hex.Vert + " bleu " + hex.Bleu + " id " + hex.ID);
                 }
             }
             //Console.WriteLine("Count " + universImporte.listeHexagonnes.Count);
